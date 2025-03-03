@@ -33,7 +33,7 @@ class VOCDataset(torch.utils.data.Dataset):
         '''
         gt_classes = self.gt_classes_all[index]
         gt_boxes = self.gt_boxes_all[index]
-        label_matrix = torch.zeros((self.S, self.S, self.C + 5*self.B))
+        label_matrix = torch.zeros((self.S, self.S, self.C + 5))
         scale_resize = self.scale_resize[index]
         for idxx in range(len(gt_classes)):
             class_label = gt_classes[idxx]
@@ -74,7 +74,7 @@ class VOCDataset(torch.utils.data.Dataset):
             scale_x = self.img_size[1]/image.shape[1] # image.shape (height, width)
             scale_y = self.img_size[0]/image.shape[0]
             image = cv2.resize(image,self.img_size) # (img_size, img_size, 3)
-            image = torch.permute(torch.tensor(image).float(), dims=(2,0,1))
+            image = torch.permute(torch.tensor(image).float(), dims=(2,0,1)) # (3, img_size, img_size)
             img_data.append(image)
             self.scale_resize.append([scale_x, scale_y])
         encode = encode_label(gt_classes_all)
