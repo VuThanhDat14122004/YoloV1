@@ -18,13 +18,19 @@ class Yolov1Loss(nn.Module):
         iou_b2 = intersection_over_union(predictions[:,:,:,26:30], target[:,:,:,21:25])
         ious = torch.cat([iou_b1.unsqueeze(0), iou_b2.unsqueeze(0)], dim=0)
         iou_maxes, best_box = torch.max(ious, dim=0) # best_box (argmax)is wide or tall box 0 or 1
-        exists_box = target[:,:,:,20].unsqueeze(3) # identity_obj_i = 1 if object exists in cell i, else 0, batchx7x7x1
+        exists_box = target[:,:,:,20].unsqueeze(3) # identity_obj_i = 1 if object exists in cell i, else 0, dim = batchx7x7x1
         # Box coordinates
         # best_box(batchx7x7) -> (batchx7x7x4) with best_box[:,:,:] = [0,0,0,0] or [1,1,1,1]
-        best_box = best_box.unsqueeze(3).to(predictions.device)
+        best_box = best_box.unsqueeze(3).to(predictions.device) 
+        '''add last dim (dim = batchx7x7x1) for multiplication with
+        predictions[:,:,:,26:30] dim=batchx7x7x4
+        '''
         box_predictions = exists_box * (
             (best_box * predictions[:,:,:,26:30] + (1-best_box) * predictions[:,:,:,21:25])
             # (1 or 0)*wide box                      (1 or 0) * tall box
+            # nếu tại vị trí đó, best_box =0 thì tức là 0*wide box + 1*tall box = tall box
+            # nếu tại vị trí đó, best_box =1 thì tức là 1*wide box + 0*tall box = wide box
+            # vì wide box đứng sau nên 26:30 là wide box, 21:25 là tall box
         )
         # avoid inline operation in gradient object
         box_predictions_new = box_predictions.clone()
