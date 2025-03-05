@@ -40,7 +40,7 @@ def parse_annotation(annotation_folder_path, img_file_path, jpg_folder):
         gt_class_all.append(list_gt_class)
     return imgs_dir, gt_class_all, gt_boxes_all
 
-def intersection_over_union(predict, target):
+def intersection_over_union(predict, target):# thêm count FP và TP ở đây nữa
     '''
     predict: tensor batch_size,S,S,4
     target: tensor batch_size,S,S,4
@@ -144,7 +144,3 @@ def nms(bboxes, iou_threshold):
         bboxes_after_nms.append(chosen_box)
     
     return bboxes_after_nms
-
-# def decode_class(dict_class):
-#     result = {v:k for k, v in dict_class.items()}
-#     return result

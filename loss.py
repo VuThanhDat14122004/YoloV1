@@ -3,7 +3,7 @@ import torch.nn as nn
 from utils import intersection_over_union
 
 class Yolov1Loss(nn.Module):
-    def __init__(self, S=7, B=2, C=20):
+    def __init__(self, S=7, B=2, C=20): # thêm 2 thuộc tính FP và TP ở đây
         super(Yolov1Loss, self).__init__()
         self.mse = nn.MSELoss(reduction="sum")
         self.S = S
@@ -14,8 +14,8 @@ class Yolov1Loss(nn.Module):
 
     def forward(self, predictions, target):
         predictions = predictions.reshape(-1, self.S, self.S, self.C + self.B*5) # bacthx7x7x30
-        iou_b1 = intersection_over_union(predictions[:,:,:,21:25], target[:,:,:,21:25])
-        iou_b2 = intersection_over_union(predictions[:,:,:,26:30], target[:,:,:,21:25])
+        iou_b1 = intersection_over_union(predictions[:,:,:,21:25], target[:,:,:,21:25])# thêm count FP và TP ở đây nữa
+        iou_b2 = intersection_over_union(predictions[:,:,:,26:30], target[:,:,:,21:25])# thêm count FP và TP ở đây nữa
         ious = torch.cat([iou_b1.unsqueeze(0), iou_b2.unsqueeze(0)], dim=0)
         iou_maxes, best_box = torch.max(ious, dim=0) # best_box (argmax)is wide or tall box 0 or 1
         exists_box = target[:,:,:,20].unsqueeze(3) # identity_obj_i = 1 if object exists in cell i, else 0, dim = batchx7x7x1
